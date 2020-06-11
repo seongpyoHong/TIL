@@ -3,11 +3,11 @@ MongoDB ReplicaSet을 구축하는 과정 중, Primary Node에 접속하여 Seco
 
 StatefulSet의 생성 이후 수동으로 해줄 수도 있지만, StatefulSet의 Replica 수의 변화를 동적으로 탐지하여 자동으로 등록해주기 위해 현재 Stateful의 Peer들을 알 수 있는 솔루션이 필요
 
-`Peer-Finder`는 Go로 작성되어 있으며, 실행파일의 인자로 `on-start.sh`, `service`,`namespace`를 받는다. 
-```
-> peer-finder -on-start=<on-start.sh path> -service=<service-name> -namespace=<namespace-name>
-```
-
+  - `Peer-Finder`는 Go로 작성되어 있으며, 실행파일의 인자로 `on-start.sh`, `service`,`namespace`를 받는다. 
+  ```
+  > peer-finder -on-start=<on-start.sh path> -service=<service-name> -namespace=<namespace-name>
+  ```
+  - `Peer-Finder`의 인자 중 `on-start.sh`로 넘겨 받은 스크립트에 stdin으로 peer 목록을 넘겨주고, `on-start.sh`에서 이를 이용하여 설정을 진행
 #### 실행 결과
 ```
 2020/06/11 17:17:45 Peer list updated
