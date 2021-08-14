@@ -37,7 +37,51 @@ ha proxy가 클라이언트에 대해 keep-alive로 실행될 때 문제
 
 
 ----------- 2021-08-10 / TODO: proxy protocol + 어떤 장점을 가지는지 
+### Proxy Protocol?
+client-server가 direct로 연결되었을 때 얻을 수 있던 정보들을 proxy를 사용하면서 얻을 수 있게 하기위한 protocol
+- v1 : human readable header
+- v2 : binary header
 
+#### Architectural benefits
+1. multiple layer의 구조일 경우, transparent proxy의 경우에는 방화벽에서 client-ip를 처리해야하 하기 때문에 처리해야할 작업의 복잡도가 증가하지만, proxy protocol을 사용하게 되면 이전 proxy의 ip가 방화벽을 통과하기 때문에 쉽게 적용할 수 있다.
+```
+         Internet
+          ,---.                     | client to PX1:
+         (  X  )                    | native protocol
+          `---'                     |
+            |                       V
+         +--+--+      +-----+
+         | FW1 |------| PX1 |
+         +--+--+      +-----+       | PX1 to PX2: PROXY + native
+            |                       V
+         +--+--+      +-----+
+         | FW2 |------| PX2 |
+         +--+--+      +-----+       | PX2 to SRV: PROXY + native
+            |                       V
+         +--+--+
+         | SRV |
+         +-----+
+```
+
+2. Mutiple Proxy
+여러 Data Center가 있는 아래와 같은 경우, 각 DC는 L3 LB에서 처리하는 VIP를 사용하게 된다. L3 LB는 트래픽을 L7 SSL/cache offloader farm으로 라우팅하며 해당 farm은 로컬 서버간의 로드 밸런싱을 수행한다.
+
+이 때, VIP DC에 종속적이게 되는데 클라이언트는 하나의 DC에 종속적이면 안되기 떄문에 L7 Proxy는 인터넷이나 LAN을 통해 접근할 수 있는 다른 DC 서버도 알 수 있어야 한다.
+이 때 PROXY protocol을 사용하게 되면 DC간의 트래픽에도 원래 서버 주소를 전달할 수 있다. 하지만 Transparent proxy를 사용하게 되는 경우, 대부분의 L7 proxy는 adress spoofing이 불가능하기 떄문에 사용할 수 없다.
+```
+                               Internet
+
+            DC1                  DC2                  DC3
+           ,---.                ,---.                ,---.
+          (  X  )              (  X  )              (  X  )
+           `---'                `---'                `---'
+             |    +-------+       |    +-------+       |    +-------+
+             +----| L3 LB |       +----| L3 LB |       +----| L3 LB |
+             |    +-------+       |    +-------+       |    +-------+
+       ------+------- ~ ~ ~ ------+------- ~ ~ ~ ------+-------
+       |||||   ||||         |||||   ||||         |||||    ||||
+      50 SRV   4 PX        50 SRV   4 PX        50 SRV    4 PX
+```
 
 ### 참고자료
 - https://www.haproxy.org/download/1.8/doc/proxy-protocol.txt
