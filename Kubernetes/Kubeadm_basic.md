@@ -1,0 +1,35 @@
+- kubeadm upgrade guide: https://v1-23.docs.kubernetes.io/ko/docs/tasks/administer-cluster/kubeadm/kubeadm-upgrade/
+	- `kubeadm upgrade apply` 는 다음과 같은 작업을 수행
+		- Cluster가 업그레이드 가능한 상태인지 확인
+			- API Server에 접근 가능한지
+			- 모든 노드가 Ready
+			- Control-Plane이 정상적으로 동작
+		- Version skew policy 확인
+		- control-plane image가 사용가능한지, 머신에서 땡길 수 있는지 화인
+		- control plane components 들을 upgrade하고 실패하는 경우 rollback 한다.
+		- 새로운 CoreDNS와 kube-proxy를 적용
+		- 필수적인 RBAC이 생성되었는지 확인
+		- 새로운 인증서 발급 (기본적으로는 180일)
+
+- kubeadm init workflow: https://kubernetes.io/docs/reference/setup-tools/kubeadm/kubeadm-init/#init-workflow
+	- `pre-flight check` 수행
+	- self-signed CA 생성 (유저가 직접 생성하려면 `/etc/kubernetes/pki` 를 지워주면 된다.)
+		- API Server는 추가적인 SAN entry를 가짐
+	- controller-manager, scheduler, kubelet이 API server와 연결하기 위해 사용할 kubeconfig 파일을 `/etc/kubernetes` 에 생성 
+		- 부가적인 kubeconfig는 admin.conf에 존재
+	- Static pod manifest를 `/etc/kubernetes/manifest` 에 작성
+		- kubelet이 해당 디렉토리를 watch하고 시작 및 변경을 반영한다.
+	- Label 및 Taint controle plane node에 추가한다.
+	- 추후 추가적인 노드가 control-plane으로 등록할 수 있도록 하기 위한 token을 사용
+	- node join을 위한 필요 설정들을 생성
+		-   Write a ConfigMap for making available all the information required for joining, and set up related RBAC access rules.
+		-   Let Bootstrap Tokens access the CSR signing API.
+		-   Configure auto-approval for new CSR requests.
+	- DNS server 및 kube-proxy addon을 설치한다.
+
+- kubeadm join worklow: https://kubernetes.io/docs/reference/setup-tools/kubeadm/kubeadm-join/#join-workflow
+	- API Server로 부터 필수적인 cluster 정보를 다운로드
+		- bootstrap token, CA key hash
+		- cluster 정보가 확인되면 kubelet이 TLS bootstrapping process를 실행
+		- kubeadm는 local kubelet이 API Server에 연결할 수 있도록 설정한다.
+		- etcd member 추가도 진행
