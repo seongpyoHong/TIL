@@ -33,3 +33,14 @@
 		- cluster 정보가 확인되면 kubelet이 TLS bootstrapping process를 실행
 		- kubeadm는 local kubelet이 API Server에 연결할 수 있도록 설정한다.
 		- etcd member 추가도 진행
+
+- kubeadm upgrade node: https://kubernetes.io/ko/docs/tasks/administer-cluster/kubeadm/kubeadm-upgrade/#%EC%9E%91%EB%8F%99-%EC%9B%90%EB%A6%AC
+
+	- Control Plane
+		- 클러스터에서 Kubeadm `ClusterConfiguration`을 가져옴
+		- 선택적으로 kube-apiserver 인증서 백업
+		- static pod manifest upgrade
+		- kubelet config upgrade
+	- Worker Node: 
+		- 클러스터에서 kubeadm `ClusterConfiguration`을 가져옴
+		- kubelet config upgrade
