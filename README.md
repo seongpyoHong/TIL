@@ -5,24 +5,6 @@
 Today I Learned
 
 *There are 83 TIL files!*
-
-### .obsidian
-
-- [app](.obsidian/app.json)
-- [appearance](.obsidian/appearance.json)
-- [community-plugins](.obsidian/community-plugins.json)
-- [core-plugins-migration](.obsidian/core-plugins-migration.json)
-- [core-plugins](.obsidian/core-plugins.json)
-- [graph](.obsidian/graph.json)
-- [hotkeys](.obsidian/hotkeys.json)
-- [plugins](.obsidian/plugins)
-- [plugins](.obsidian/plugins/obsidian-git)
-- [plugins](.obsidian/plugins/obsidian-git/data.json)
-- [plugins](.obsidian/plugins/obsidian-git/main.js)
-- [plugins](.obsidian/plugins/obsidian-git/manifest.json)
-- [plugins](.obsidian/plugins/obsidian-git/styles.css)
-- [workspace](.obsidian/workspace)
-- [workspace](.obsidian/workspace.json)
 ### Docker
 
 - [PID](Docker/PID.md)
