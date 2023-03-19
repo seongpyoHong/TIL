@@ -54,4 +54,26 @@ service port(inbound) => pod(outbound)
 #### Routing != Loadblancing
 위의 설명처럼 Service 트래픽은 netfilter를 통해 보내지기 때문에 L3에서 동작하게 된다. 따라서 외부에서 들어오는 클라이언트도 동일하게 IP+Port(L3)를 통해 연결을 시도해야 한다.
 
----- TODO: NodePort ,LoadBlanacer, Ingress
+하지만 ClusterIP는 Cluster 내부의 IP이기 때문에 외부에서는 해당 주소 대역에 대해 알지 못한다.
+
+이를 위해 LoadBalancer(이하 LB)를 사용한다.
+- LB는 Client가 접근하기 위한 공인 IP가 필요하다.
+- LB는 각 노드의 주소를 알고 있어야 한다.
+	- Service 네트워크를 제외한 각 노드의 ethernet interface를 사용해야 한다.
+	- 하지만 Service 네트워크에서 사용하는 port를 직접 노드 네트워크에서 사용할 수는 없다. (직접 사용하면 netfilter를 거치지 않기 때문에)
+	- 이를 위해 `NodePort` 타입의 Service가 존재한다.
+
+#### NodePort Service
+각 노드의 `eth0` 네트워크 인터페이스에 30000 ~ 32767 사이의 임의의 포트를 매핑한다.
+- flow: client => LB(Node IP:NodePort) => Node => netfilter => Service IP: Service Port
+
+- NodePort를 사용하게 되면 Client 측에 non-standard port를 열어주어야 하기 때문에 LB를 앞단에 대는게 보통
+
+#### LoadBalancer Service
+LB API가 지원 가능한 환경에서는 앞단에 LB를 대는 것까지 Kubernetes에서 자동으로 해준다 (service에 직접 external IP를 할당)
+- 하나의 서비스 타입만 외부에 노출
+
+#### Ingress
+여러개의 서비스가 하나의 로드 밸런서를 통해 유연한 설정을 가능케 함
+ingress controller(LB)를 통해 외부 트래픽이 들어옴
+
